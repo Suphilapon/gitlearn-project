@@ -22,8 +22,8 @@
     panel: "rgba(255,255,255,.04)",
     grid: "rgba(255,255,255,.06)",
     food: "#ff4d6d",
-    snake: "#39ff88",
-    snakeHead: "#00e676",
+    snake: "#36d67c",
+    snakeHead: "#ffd166",
     dead: "rgba(255,77,109,.25)",
   };
 
@@ -307,21 +307,14 @@
       ctx.save();
       const isHead = i === 0;
       ctx.fillStyle = isHead ? COLORS.snakeHead : COLORS.snake;
-
-      // 稍微做圆角和内阴影
-      const pad = 3;
-      const r = 6;
-      roundedRect(px + pad, py + pad, gridSize - pad * 2, gridSize - pad * 2, r);
-      ctx.fill();
-
-      if (isHead) {
-        ctx.fillStyle = "rgba(0,0,0,.18)";
-        const eyeX = px + gridSize * 0.68;
-        const eyeY = py + gridSize * 0.36;
-        ctx.beginPath();
-        ctx.arc(eyeX, eyeY, 2.1, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      // 方形蛇身：占满整个格子，并用高光/阴影增强立体感
+      ctx.fillRect(px, py, gridSize, gridSize);
+      ctx.fillStyle = "rgba(255,255,255,.14)";
+      ctx.fillRect(px, py, gridSize, 2);
+      ctx.fillRect(px, py, 2, gridSize);
+      ctx.fillStyle = "rgba(0,0,0,.16)";
+      ctx.fillRect(px, py + gridSize - 2, gridSize, 2);
+      ctx.fillRect(px + gridSize - 2, py, 2, gridSize);
 
       ctx.restore();
     }
