@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>网页版贪吃蛇</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="title">网页版贪吃蛇</div>
+      <div class="stats">
+        <div>分数：<span id="score">0</span></div>
+        <div>速度：<span id="speed">8</span>/秒</div>
+      </div>
+    </header>
+
+    <section class="boardWrap">
+      <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
+
+      <div id="overlay" class="overlay" role="dialog" aria-modal="true">
+        <div class="overlayCard">
+          <h2 id="overlayTitle">开始游戏</h2>
+          <p class="hint">
+            使用方向键或 `WASD` 移动，`空格` 暂停/继续，失败后点击按钮重开。
+          </p>
+          <button id="btnStart" class="btn">开始</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>提示：</span> 不要掉头（反向会被忽略）。
+    </footer>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>
