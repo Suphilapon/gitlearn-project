@@ -54,8 +54,11 @@
     return a.x === b.x && a.y === b.y;
   }
 
-  function inBounds(c) {
-    return c.x >= 0 && c.x < cols && c.y >= 0 && c.y < rows;
+  function wrapCell(c) {
+    return {
+      x: (c.x + cols) % cols,
+      y: (c.y + rows) % rows,
+    };
   }
 
   function resetGame() {
@@ -121,17 +124,14 @@
 
     currentDirection = nextDirection;
     const head = snake[0];
-    const newHead = { x: head.x + currentDirection.x, y: head.y + currentDirection.y };
-
-    // 撞墙
-    if (!inBounds(newHead)) {
-      return gameOver();
-    }
+    const newHead = wrapCell({
+      x: head.x + currentDirection.x,
+      y: head.y + currentDirection.y,
+    });
 
     // 撞到自身：
     // - 允许移动到“将要被移除的尾巴位置”这种情况（不然规则会过严）
     const willGrow = eqCell(newHead, food);
-    const tail = snake[snake.length - 1];
     const hitsBody = snake.some((s, idx) => {
       if (idx === snake.length - 1 && !willGrow) return false; // 尾巴会被移除
       return eqCell(s, newHead);
