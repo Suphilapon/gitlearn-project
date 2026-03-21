@@ -352,18 +352,72 @@
     if (!heart) return;
     const cx = heart.x * gridSize + gridSize / 2;
     const cy = heart.y * gridSize + gridSize / 2;
-    const s = gridSize * 0.32;
+    const s = gridSize * 0.48;
     ctx.save();
-    ctx.fillStyle = COLORS.heart;
+
+    // 主体：更大、更饱满，基本占满一格
+    const bodyGrad = ctx.createLinearGradient(cx, cy - s, cx, cy + s);
+    bodyGrad.addColorStop(0, "#ff6a84");
+    bodyGrad.addColorStop(0.45, COLORS.heart);
+    bodyGrad.addColorStop(1, "#c90f2e");
+    ctx.fillStyle = bodyGrad;
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s * 0.35);
-    ctx.bezierCurveTo(cx - s * 1.1, cy - s * 0.25, cx - s * 0.55, cy - s * 0.95, cx, cy - s * 0.35);
-    ctx.bezierCurveTo(cx + s * 0.55, cy - s * 0.95, cx + s * 1.1, cy - s * 0.25, cx, cy + s * 0.35);
+    ctx.moveTo(cx, cy + s * 0.9);
+    ctx.bezierCurveTo(
+      cx - s * 1.35,
+      cy + s * 0.1,
+      cx - s * 1.05,
+      cy - s * 1.1,
+      cx,
+      cy - s * 0.38
+    );
+    ctx.bezierCurveTo(
+      cx + s * 1.05,
+      cy - s * 1.1,
+      cx + s * 1.35,
+      cy + s * 0.1,
+      cx,
+      cy + s * 0.9
+    );
     ctx.closePath();
+
+    // 先画柔和阴影，再画本体，增加立体层次
+    ctx.shadowColor = "rgba(255, 28, 68, .42)";
+    ctx.shadowBlur = 8;
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,.35)";
-    ctx.lineWidth = 1;
+
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = "rgba(255,255,255,.18)";
     ctx.stroke();
+
+    // 顶部高光：玻璃感
+    const topShine = ctx.createRadialGradient(
+      cx - s * 0.35,
+      cy - s * 0.55,
+      1,
+      cx - s * 0.35,
+      cy - s * 0.55,
+      s * 0.95
+    );
+    topShine.addColorStop(0, "rgba(255,255,255,.55)");
+    topShine.addColorStop(0.35, "rgba(255,255,255,.24)");
+    topShine.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = topShine;
+    ctx.beginPath();
+    ctx.ellipse(cx - s * 0.14, cy - s * 0.42, s * 0.78, s * 0.58, -0.38, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 小亮点：亮晶晶效果
+    ctx.fillStyle = "rgba(255,255,255,.78)";
+    ctx.beginPath();
+    ctx.arc(cx - s * 0.52, cy - s * 0.48, s * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.62)";
+    ctx.beginPath();
+    ctx.arc(cx + s * 0.08, cy - s * 0.22, s * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
   }
 
