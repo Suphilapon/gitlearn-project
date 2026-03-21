@@ -22,10 +22,20 @@
     panel: "rgba(255,255,255,.04)",
     grid: "rgba(255,255,255,.06)",
     food: "#ff4d6d",
+    heart: "#ff2d4a",
     snake: "#36d67c",
     snakeHead: "#ffd166",
     dead: "rgba(255,77,109,.25)",
   };
+
+  const HEART_DURATION_MS = 6000;
+
+  /** 剩余秒数（0~6）→ 分数：>5→36，>4→30… 线性递减，每档差 6 */
+  function heartScoreFromRemainingSeconds(remainingSec) {
+    if (remainingSec <= 0) return 0;
+    const pts = 6 * (Math.floor(remainingSec) + 1);
+    return Math.min(36, Math.max(6, pts));
+  }
 
   const dir = {
     up: { x: 0, y: -1 },
@@ -37,6 +47,10 @@
   // ===== 状态 =====
   let snake = [];
   let food = { x: 10, y: 10 };
+  /** @type {{ x: number, y: number, spawnAt: number } | null} */
+  let heart = null;
+  /** 每吃满 6 个普通果子触发一次红心 */
+  let fruitsEatenForHeart = 0;
   let currentDirection = dir.right;
   let nextDirection = dir.right;
 
@@ -80,6 +94,9 @@
     currentDirection = dir.right;
     nextDirection = dir.right;
 
+    heart = null;
+    fruitsEatenForHeart = 0;
+
     placeFood();
 
     running = false;
@@ -99,13 +116,30 @@
     // 食物不能出现在蛇身上
     for (let i = 0; i < 500; i++) {
       const candidate = { x: randInt(0, cols - 1), y: randInt(0, rows - 1) };
-      if (!snake.some((s) => eqCell(s, candidate))) {
+      if (
+        !snake.some((s) => eqCell(s, candidate)) &&
+        !(heart && eqCell(candidate, heart))
+      ) {
         food = candidate;
         return;
       }
     }
     // 极端情况下兜底
     food = { x: 0, y: 0 };
+  }
+
+  function placeHeart() {
+    for (let i = 0; i < 500; i++) {
+      const candidate = { x: randInt(0, cols - 1), y: randInt(0, rows - 1) };
+      if (
+        !snake.some((s) => eqCell(s, candidate)) &&
+        !eqCell(candidate, food)
+      ) {
+        heart = { x: candidate.x, y: candidate.y, spawnAt: performance.now() };
+        return;
+      }
+    }
+    heart = null;
   }
 
   function canTurn(from, to) {
@@ -122,6 +156,10 @@
   function tick() {
     if (!running || paused) return;
 
+    if (heart && performance.now() - heart.spawnAt >= HEART_DURATION_MS) {
+      heart = null;
+    }
+
     currentDirection = nextDirection;
     const head = snake[0];
     const newHead = wrapCell({
@@ -131,20 +169,42 @@
 
     // 撞到自身：
     // - 允许移动到“将要被移除的尾巴位置”这种情况（不然规则会过严）
-    const willGrow = eqCell(newHead, food);
+    const willEatFood = eqCell(newHead, food);
+    const willEatHeart = heart && eqCell(newHead, heart);
+    const willGrow = willEatFood;
     const hitsBody = snake.some((s, idx) => {
-      if (idx === snake.length - 1 && !willGrow) return false; // 尾巴会被移除
+      if (idx === snake.length - 1 && !willGrow && !willEatHeart) return false; // 尾巴会被移除
       return eqCell(s, newHead);
     });
     if (hitsBody) {
       return gameOver();
     }
 
-    // 吃到食物
     snake.unshift(newHead);
-    if (willGrow) {
+    if (willEatHeart) {
+      const elapsed = performance.now() - heart.spawnAt;
+      const remainingSec = Math.max(0, (HEART_DURATION_MS - elapsed) / 1000);
+      const bonus = heartScoreFromRemainingSeconds(remainingSec);
+      score += bonus;
+      scoreEl.textContent = String(score);
+      heart = null;
+
+      if (score % speedEvery === 0) {
+        speed = +(speed + speedStep).toFixed(2);
+        speedEl.textContent = String(speed);
+        restartTimerWithNewSpeed();
+      }
+
+      snake.pop();
+    } else if (willGrow) {
       score += 1;
       scoreEl.textContent = String(score);
+
+      fruitsEatenForHeart += 1;
+      if (fruitsEatenForHeart >= 6) {
+        fruitsEatenForHeart = 0;
+        placeHeart();
+      }
 
       // 速度随分数提升
       if (score % speedEvery === 0) {
@@ -201,6 +261,7 @@
     paused = false;
     clearInterval(timer);
     timer = null;
+    heart = null;
 
     overlayTitle.textContent = "游戏结束";
     btnStart.textContent = "重开";
@@ -287,6 +348,25 @@
     ctx.restore();
   }
 
+  function drawHeart() {
+    if (!heart) return;
+    const cx = heart.x * gridSize + gridSize / 2;
+    const cy = heart.y * gridSize + gridSize / 2;
+    const s = gridSize * 0.32;
+    ctx.save();
+    ctx.fillStyle = COLORS.heart;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s * 0.35);
+    ctx.bezierCurveTo(cx - s * 1.1, cy - s * 0.25, cx - s * 0.55, cy - s * 0.95, cx, cy - s * 0.35);
+    ctx.bezierCurveTo(cx + s * 0.55, cy - s * 0.95, cx + s * 1.1, cy - s * 0.25, cx, cy + s * 0.35);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.35)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function roundedRect(x, y, w, h, r) {
     const rr = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -327,6 +407,7 @@
 
     drawGrid();
     drawFood();
+    drawHeart();
     drawSnake();
 
     if (showDeadEffect) {
