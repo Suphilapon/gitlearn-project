@@ -7,6 +7,22 @@
   const overlay = document.getElementById("overlay");
   const overlayTitle = document.getElementById("overlayTitle");
   const btnStart = document.getElementById("btnStart");
+  const skinGrid = document.getElementById("skinGrid");
+
+  const STORAGE_SKIN = "snakeSkinPreset";
+
+  /** 蛇身配色：body 为蛇身，head 为蛇头（醒目对比色） */
+  const SNAKE_PRESETS = [
+    { id: "emerald", label: "翡翠绿", body: "#36d67c", head: "#ffd166" },
+    { id: "cyan", label: "青碧", body: "#2dd4bf", head: "#fef08a" },
+    { id: "sky", label: "天蓝", body: "#38bdf8", head: "#fde047" },
+    { id: "violet", label: "紫罗兰", body: "#a78bfa", head: "#fcd34d" },
+    { id: "rose", label: "玫红", body: "#fb7185", head: "#fef9c3" },
+    { id: "amber", label: "琥珀", body: "#fbbf24", head: "#1e293b" },
+  ];
+
+  let snakeBodyColor = SNAKE_PRESETS[0].body;
+  let snakeHeadColor = SNAKE_PRESETS[0].head;
 
   // ===== 游戏参数 =====
   const gridSize = 20; // 每格 20px，400/20 = 20格
@@ -22,8 +38,6 @@
     panel: "rgba(255,255,255,.04)",
     grid: "rgba(255,255,255,.06)",
     food: "#ff4d6d",
-    snake: "#36d67c",
-    snakeHead: "#ffd166",
     dead: "rgba(255,77,109,.25)",
   };
 
@@ -306,7 +320,7 @@
 
       ctx.save();
       const isHead = i === 0;
-      ctx.fillStyle = isHead ? COLORS.snakeHead : COLORS.snake;
+      ctx.fillStyle = isHead ? snakeHeadColor : snakeBodyColor;
       // 方形蛇身：占满整个格子，并用高光/阴影增强立体感
       ctx.fillRect(px, py, gridSize, gridSize);
       ctx.fillStyle = "rgba(255,255,255,.14)";
@@ -337,6 +351,71 @@
     }
   }
 
+  function applySkinPreset(id) {
+    const preset = SNAKE_PRESETS.find((p) => p.id === id) || SNAKE_PRESETS[0];
+    snakeBodyColor = preset.body;
+    snakeHeadColor = preset.head;
+    try {
+      localStorage.setItem(STORAGE_SKIN, preset.id);
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  function readSavedSkinId() {
+    try {
+      return localStorage.getItem(STORAGE_SKIN);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function shouldRenderDeadTint() {
+    return overlayTitle.textContent === "游戏结束";
+  }
+
+  function buildSkinPicker() {
+    const saved = readSavedSkinId();
+    const initialId = SNAKE_PRESETS.some((p) => p.id === saved) ? saved : SNAKE_PRESETS[0].id;
+    applySkinPreset(initialId);
+
+    if (!skinGrid) return;
+
+    skinGrid.innerHTML = "";
+    SNAKE_PRESETS.forEach((p) => {
+      const label = document.createElement("label");
+      label.className = "skinOption";
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "snakeSkin";
+      input.value = p.id;
+      if (p.id === initialId) input.checked = true;
+
+      const sw = document.createElement("span");
+      sw.className = "skinSwatches";
+      const b = document.createElement("span");
+      b.className = "skinSwatch";
+      b.style.background = p.body;
+      const h = document.createElement("span");
+      h.className = "skinSwatch";
+      h.style.background = p.head;
+      sw.append(b, h);
+
+      const text = document.createElement("span");
+      text.className = "skinLabel";
+      text.textContent = p.label;
+
+      label.append(input, sw, text);
+      skinGrid.appendChild(label);
+
+      input.addEventListener("change", () => {
+        if (!input.checked) return;
+        applySkinPreset(p.id);
+        render(shouldRenderDeadTint());
+      });
+    });
+  }
+
   // ===== 事件 =====
   document.addEventListener("keydown", handleKeyDown, { passive: false });
 
@@ -360,6 +439,7 @@
   });
 
   // ===== 初始化 =====
+  buildSkinPicker();
   resetGame();
   render(false);
 })();

@@ -18,23 +18,36 @@
       </div>
     </header>
 
-    <section class="boardWrap">
-      <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
+    <div class="layout">
+      <div class="mainCol">
+        <section class="boardWrap">
+          <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
 
-      <div id="overlay" class="overlay" role="dialog" aria-modal="true">
-        <div class="overlayCard">
-          <h2 id="overlayTitle">开始游戏</h2>
-          <p class="hint">
-            使用方向键或 `WASD` 移动，`空格` 暂停/继续，失败后点击按钮重开。
-          </p>
-          <button id="btnStart" class="btn">开始</button>
-        </div>
+          <div id="overlay" class="overlay" role="dialog" aria-modal="true">
+            <div class="overlayCard">
+              <h2 id="overlayTitle">开始游戏</h2>
+              <p class="hint">
+                使用方向键或 `WASD` 移动，`空格` 暂停/继续，失败后点击按钮重开。
+              </p>
+              <button id="btnStart" class="btn">开始</button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <span>提示：</span> 不要掉头（反向会被忽略）。
+        </footer>
       </div>
-    </section>
 
-    <footer class="footer">
-      <span>提示：</span> 不要掉头（反向会被忽略）。
-    </footer>
+      <aside class="sideCol" aria-label="外观设置">
+        <h2 class="sideTitle">蛇身颜色</h2>
+        <p class="sideHint">选择后即时生效，选择会保存在本机浏览器。</p>
+        <fieldset class="skinFieldset">
+          <legend class="visuallyHidden">蛇身配色方案</legend>
+          <div class="skinGrid" id="skinGrid"></div>
+        </fieldset>
+      </aside>
+    </div>
   </main>
 
   <script src="./script.js"></script>

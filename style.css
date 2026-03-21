@@ -26,7 +26,130 @@ body{
 }
 
 .app{
-  width: min(940px, 96vw);
+  width: min(1100px, 96vw);
+}
+
+.layout{
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mainCol{
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.sideCol{
+  flex: 0 0 220px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--panelBorder);
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+}
+
+.sideTitle{
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sideHint{
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.skinFieldset{
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.visuallyHidden{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skinGrid{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skinOption{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--panelBorder);
+  background: rgba(255,255,255,.04);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.skinOption:hover{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.07);
+}
+
+.skinOption:has(input:focus-visible){
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skinOption input{
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.skinOption:has(input:checked){
+  border-color: rgba(87,212,255,.55);
+  background: rgba(87,212,255,.10);
+}
+
+.skinSwatches{
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.skinSwatch{
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+.skinLabel{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.skinOption:has(input:checked) .skinLabel{
+  color: var(--text);
+}
+
+@media (max-width: 720px){
+  .sideCol{
+    flex: 1 1 100%;
+  }
 }
 
 .topbar{
@@ -60,7 +183,7 @@ body{
 }
 
 .boardWrap{
-  margin-top: 14px;
+  margin-top: 0;
   position: relative;
   border-radius: 16px;
   overflow: hidden;
@@ -70,9 +193,16 @@ body{
 
 canvas{
   display: block;
-  width: min(82vh, 92vw);
+  width: 100%;
+  max-width: min(82vh, calc(96vw - 260px));
   height: auto;
   aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 720px){
+  canvas{
+    max-width: min(82vh, 92vw);
+  }
 }
 
 .overlay{
